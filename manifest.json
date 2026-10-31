@@ -1,0 +1,20 @@
+{
+  "name": "Spotters IDF",
+  "short_name": "Spotters IDF",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#002244",
+  "theme_color": "#0055a5",
+  "icons": [
+    {
+      "src": "téléchargement.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "téléchargement.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

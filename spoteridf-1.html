@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotters IDF - Plateforme Officielle</title>
+    <style>
+        :root {
+            --primary: #002244;
+            --secondary: #0055a5;
+            --accent: #ffcc00;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #222222;
+            --sidebar-bg: #001122;
+            --border-color: #dcdcdc;
+            --success: #28a745;
+            --error: #d9534f;
+            --warning: #f0ad4e;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1a1a;
+            --card-bg: #262626;
+            --text-color: #f0f0f0;
+            --sidebar-bg: #111111;
+            --border-color: #444444;
+        }
+
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; transition: background 0.3s, color 0.3s; }
+
+        header { background: linear-gradient(90deg, var(--primary), var(--secondary)); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .logo-area { display: flex; align-items: center; gap: 15px; }
+        .logo-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: white; padding: 3px; }
+        header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+        header p { margin: 0; opacity: 0.9; font-size: 13px; font-weight: 400; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .theme-toggle { background: rgba(255,255,255,0.15); border: none; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.3s; }
+        .theme-toggle:hover { background: rgba(255,255,255,0.25); }
+
+        .train-gallery { display: flex; justify-content: center; gap: 15px; padding: 15px; background: var(--card-bg); border-bottom: 3px solid var(--secondary); overflow-x: auto; }
+        .train-card { flex: 0 0 180px; text-align: center; }
+        .train-card img { width: 100%; height: 95px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); transition: transform 0.2s; }
+        .train-card img:hover { transform: scale(1.05); }
+        .train-card span { font-size: 12px; font-weight: 700; color: var(--secondary); display: block; margin-top: 6px; }
+
+        .app-body { display: flex; flex: 1; overflow: hidden; }
+
+        .sidebar { width: 280px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; padding-top: 15px; flex-shrink: 0; overflow-y: auto; }
+        .sidebar button { background: none; border: none; color: #a0aec0; padding: 14px 25px; text-align: left; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; }
+        .sidebar button:hover, .sidebar button.active { background-color: var(--secondary); color: white; }
+        .sidebar .section-title { font-size: 12px; text-transform: uppercase; color: #63b3ed; padding: 15px 25px 5px 25px; font-weight: 700; letter-spacing: 1px; }
+
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; }
+        .content-container { width: 100%; max-width: 1000px; }
+
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 25px; border: 1px solid var(--border-color); transition: background 0.3s; }
+        h2, h3 { color: var(--secondary); margin-top: 0; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
+        input[type="text"], input[type="password"], input[type="date"], select, textarea, input[type="file"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 8px; font-size: 14px; transition: border 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--secondary); outline: none; }
+        button.btn-primary { width: 100%; padding: 12px; background-color: var(--secondary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 700; transition: background 0.3s; }
+        button.btn-primary:hover { background-color: #003f7f; }
+
+        .hidden { display: none !important; }
+        .error { color: var(--error); font-weight: 700; margin-top: 10px; font-size: 14px; text-align: center; }
+        .success { color: var(--success); font-weight: 700; margin-top: 10px; font-size: 14px; }
+
+        .line-diagram { display: flex; align-items: center; justify-content: flex-start; position: relative; margin: 35px 0; padding: 25px 20px; background: var(--bg-color); border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; gap: 50px; }
+        .line-diagram::before { content: ''; position: absolute; top: 50%; left: 40px; right: 40px; height: 6px; background: var(--secondary); transform: translateY(-50%); z-index: 1; }
+        .station-node { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; min-width: 120px; }
+        .node-dot { width: 22px; height: 22px; border-radius: 50%; background: white; border: 5px solid var(--secondary); box-shadow: 0 0 8px rgba(0,0,0,0.2); }
+        .station-node.active .node-dot { background: var(--success); border-color: var(--primary); transform: scale(1.3); }
+        .node-name { font-size: 12px; font-weight: 700; margin-top: 12px; text-align: center; white-space: nowrap; }
+
+        .station-board { background: #111; color: var(--accent); font-family: 'Courier New', Courier, monospace; padding: 20px; border-radius: 10px; border: 3px solid #333; }
+        .board-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #333; font-size: 15px; }
+        .board-row:last-child { border: none; }
+        .train-time { font-weight: 700; color: #fff; }
+        .train-dest { color: #00ffcc; flex: 1; margin-left: 20px; }
+        .train-voie { background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+
+        .chat-box { height: 350px; border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; overflow-y: auto; background: var(--bg-color); margin-bottom: 15px; }
+        .chat-msg { background: var(--card-bg); padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 12px; position: relative; font-size: 14px; }
+        .chat-msg strong { color: var(--secondary); }
+        .chat-msg .time { font-size: 11px; opacity: 0.7; margin-left: 8px; }
+        .chat-msg img { max-width: 250px; max-height: 180px; display: block; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .chat-msg .delete-msg { position: absolute; right: 12px; top: 10px; color: var(--error); cursor: pointer; font-weight: 700; font-size: 16px; }
+        .hashtag { color: #0275d8; font-weight: 700; }
+        .mention { color: var(--success); font-weight: 700; }
+
+        .social-category { margin-bottom: 15px; }
+        .social-category h4 { margin: 8px 0; color: var(--secondary); font-size: 14px; }
+        .social-tag { display: inline-flex; align-items: center; background: var(--bg-color); padding: 6px 12px; border-radius: 6px; margin: 4px; font-size: 13px; font-weight: 700; color: var(--secondary); border: 1px solid var(--border-color); }
+        .delete-btn { margin-left: 8px; color: var(--error); cursor: pointer; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; }
+        th { background-color: rgba(0,0,0,0.05); color: var(--secondary); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-box { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; text-align: center; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .stat-box h4 { margin: 0; font-size: 24px; color: var(--secondary); font-weight: 700; }
+        .stat-box p { margin: 8px 0 0; font-size: 12px; opacity: 0.8; font-weight: 600; }
+
+        .quiz-image { max-width: 100%; max-height: 350px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; border: 2px solid var(--border-color); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <img src="téléchargement.png" alt="Logo IDFM" class="logo-img">
+            <div>
+                <h1>Spotters d'Île-de-France 🚆📸</h1>
+                <p>Plateforme Officielle - RER, Transilien, Métro, TGV, TER & Tramways</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Mode Sombre</button>
+            <div id="headerUserNav" class="hidden" style="display:flex; align-items:center; gap:15px;">
+                <span style="font-size: 14px;">Connecté: <strong id="currentConnectedUser"></strong> | Crédits: <strong id="userCreditsDisplay" style="color:var(--accent);">0</strong>pts</span>
+                <button onclick="logout()" style="background: var(--error); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size:13px;">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="mainGallery" class="train-gallery hidden">
+        <div class="train-card">
+            <img src="images.jfif" alt="BB 26000 Corail">
+            <span>BB 26000 & Corail[cite: 6]</span>
+        </div>
+        <div class="train-card">
+            <img src="images (2).jfif" alt="Z2N / RER C">
+            <span>RER C & Z2N[cite: 3, 4]</span>
+        </div>
+        <div class="train-card">
+            <img src="images (1).jfif" alt="Rames Modernes Z2N">
+            <span>Rames Z2N Île-de-France[cite: 5]</span>
+        </div>
+        <div class="train-card">
+            <img src="images (3).jfif" alt="Matériel Récent IDF">
+            <span>Matériel Régional IDF[cite: 2]</span>
+        </div>
+    </div>
+
+    <div id="loginSection" class="main-content" style="align-items: center;">
+        <div class="card" style="width: 100%; max-width: 400px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="téléchargement.png" alt="Logo IDFM" style="width: 70px; height: 70px; border-radius: 15px; object-fit: cover; margin-bottom: 12px;">
+                <h2>Connexion Spotters IDF</h2>
+            </div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Identifiant</label>
+                    <input type="text" id="username" placeholder="Entrez votre identifiant" required autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="password" placeholder="Entrez votre mot de passe" required autocomplete="off">
+                </div>
+                <button type="submit" class="btn-primary">Se connecter</button>
+                <p id="loginMessage" class="error"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="protectedContent" class="app-body hidden">
+
+        <div class="sidebar">
+            <div class="section-title">Général</div>
+            <button onclick="showTab('trafficTab')" id="btn-trafficTab" class="active">📊 Info Trafic</button>
+            <button onclick="showTab('spotsTab')" id="btn-spotsTab">📍 Lieux de Spot IDF</button>
+            <button onclick="showTab('stationsTab')" id="btn-stationsTab">🚉 Tableau des Gares (Direct)</button>
+            <button onclick="showTab('chatTab')" id="btn-chatTab">💬 Chat Spotting</button>
+            <button onclick="showTab('trainsPassTab')" id="btn-trainsPassTab">📢 Infos Passages</button>
+            <button onclick="showTab('socialsTab')" id="btn-socialsTab">📱 Réseaux Sociaux</button>
+            <button onclick="showTab('contestTab')" id="btn-contestTab">🏆 Concours & Événements</button>
+            <button onclick="showTab('spotSessionTab')" id="btn-spotSessionTab">📅 Je Spotte (Sessions)</button>
+            <button onclick="showTab('quizTab')" id="btn-quizTab">🧩 Trouve le Lieu</button>
+            <button onclick="showTab('contactTab')" id="btn-contactTab">✉️ Nous Contacter</button>
+
+            <div id="spotterMenuTitle" class="section-title hidden">Espace Membre</div>
+            <button id="btn-profileTab" onclick="showTab('profileTab')" class="hidden">👤 Mon Profil</button>
+
+            <div id="adminMenuTitle" class="section-title hidden">Administration</div>
+            <button id="btn-moderationTab" onclick="showTab('moderationTab')" class="hidden">🛠️ Modération & Bans</button>
+            <button id="btn-adminTab" onclick="showTab('adminTab')" class="hidden">⚙️ Gestion Admin</button>
+        </div>
+
+        <div class="main-content">
+            <div class="content-container">
+
+                <div class="stats-grid">
+                    <div class="stat-box"><h4 id="statMembers">0</h4><p>Spotters Inscrits</p></div>
+                    <div class="stat-box"><h4 id="statMessages">0</h4><p>Messages Postés</p></div>
+                    <div class="stat-box"><h4 style="color: var(--success);" id="statContestStatus">Actif</h4><p>Statut Concours</p></div>
+                </div>
+
+                <!-- 1. INFO TRAFIC -->
+                <div id="trafficTab" class="tab-pane">
+                    <div class="card">
+                        <h2>⚠️ Info Trafic en Temps Réel (<span id="lastCheckTime">--:--</span>)</h2>
+                        <div id="trafficContainer"></div>
+                    </div>
+                </div>
+
+                <!-- 2. LIEUX DE SPOT IDF -->
+                <div id="spotsTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>📍 Lieux de Spot de Train en Île-de-France</h2>
+                        <div class="input-group">
+                            <label>Choisir la Ligne :</label>
+                            <select id="spotLineSelect" onchange="renderSpotsForLine()">
+                                <optgroup label="RER">
+                                    <option value="RER_A">RER A</option><option value="RER_B">RER B</option><option value="RER_C">RER C</option><option value="RER_D">RER D</option><option value="RER_E">RER E</option>
+                                </optgroup>
+                                <optgroup label="Transilien & TER">
+                                    <option value="N" selected>Ligne N</option><option value="L">Ligne L</option><option value="U">Ligne U</option><option value="H">Ligne H</option><option value="J">Ligne J</option><option value="K">Ligne K</option><option value="P">Ligne P</option><option value="R">Ligne R</option><option value="TER_Chartres_LeMans">TER Paris Montparnasse - Le Mans</option><option value="TER_Chartres">TER Paris Montparnasse - Chartres</option>
+                                </optgroup>
+                                <optgroup label="Métro & Tramway">
+                                    <option value="Metro_1">Métro 1</option><option value="Metro_4">Métro 4</option><option value="T13">Tramway T13</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <h3>📍 Schéma Linéaire & Arrêts Espacés</h3>
+                        <div id="spotLineDiagram" class="line-diagram"></div>
+                        <h3>📸 Meilleurs Lieux de Spot Autorisés</h3>
+                        <div id="spotLocationsList" style="font-size: 14px; line-height: 1.6;"></div>
+                    </div>
+                </div>
+
+                <!-- 3. TABLEAU DES GARES EN DIRECT (HORAIRE REEL) -->
+                <div id="stationsTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>🚉 Affichage des Gares en Temps Réel (Infogare)</h2>
+                        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                            <div style="flex: 1;">
+                                <label>1. Ligne :</label>
+                                <select id="boardLineSelect" onchange="populateStationsForLine()">
+                                    <option value="N" selected>Ligne N</option><option value="L">Ligne L</option><option value="U">Ligne U</option><option value="RER_C">RER C</option><option value="RER_A">RER A</option><option value="TER_Chartres_LeMans">TER Paris Montparnasse - Le Mans</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1;">
+                                <label>2. Gare :</label>
+                                <select id="boardStationSelect" onchange="updateStationBoard()"></select>
+                            </div>
+                        </div>
+                        <div class="station-board">
+                            <div style="border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px; font-weight: 700; color: var(--accent);">
+                                DÉPARTS EN TEMPS RÉEL DE <span id="currentRealTimeClock"></span> — <span id="boardStationName">Gare sélectionnée</span>
+                            </div>
+                            <div id="boardRowsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. CHAT SPOTTING -->
+                <div id="chatTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>💬 Chat Spotting</h2>
+                        <div id="chatBoxGeneral" class="chat-box"></div>
+                        <form id="sendChatGeneralForm" style="display: flex; flex-direction: column; gap: 10px;">
+                            <input type="text" id="msgInputGeneral" placeholder="Votre message..." autocomplete="off">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="file" id="imageInputGeneral" accept="image/*" style="font-size: 13px; padding: 6px;">
+                                <button type="submit" class="btn-primary" style="width: 130px;">Envoyer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 5. INFOS PASSAGES -->
+                <div id="trainsPassTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>📢 Signalements de Passages de Trains</h2>
+                        <div id="chatBoxTrains" class="chat-box"></div>
+                        <form id="sendChatTrainsForm" style="display: flex; gap: 10px;">
+                            <input type="text" id="msgInputTrains" placeholder="Ex: Rame vue à Saint-Cyr #LigneN" required autocomplete="off">
+                            <button type="submit" class="btn-primary" style="width: 130px;">Publier</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 6. RESEAUX SOCIAUX -->
+                <div id="socialsTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>📱 Réseaux Sociaux des Spotters</h2>
+                        <div id="socialsDisplayArea">
+                            <div class="social-category"><h4>TikTok</h4><div id="list-tiktok"></div></div>
+                            <div class="social-category"><h4>Snapchat</h4><div id="list-snapchat"></div></div>
+                            <div class="social-category"><h4>Instagram</h4><div id="list-instagram"></div></div>
+                            <div class="social-category"><h4>Facebook</h4><div id="list-facebook"></div></div>
+                            <div class="social-category"><h4>YouTube</h4><div id="list-youtube"></div></div>
+                            <div class="social-category"><h4>Twitter / X</h4><div id="list-twitter"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. CONCOURS & ÉVÉNEMENTS (ADMIN MODIFIABLE / ACTIF-INACTIF) -->
+                <div id="contestTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>🏆 Concours Photographique & Vidéographique</h2>
+                        <div id="activeContestBox" style="background: rgba(0,85,165,0.05); padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid var(--border-color);">
+                            <h3 id="displayContestTitle" style="margin-top:0;">Grand Concours de Spotting Île-de-France</h3>
+                            <p id="contestDesc">Chargement des détails du concours...</p>
+                            <div id="participateBox">
+                                <button onclick="openParticipateModal()" class="btn-primary" style="background-color: var(--success); width: auto; padding: 10px 25px;">Je participe</button>
+                            </div>
+                            <p id="contestClosedMsg" class="error hidden">Ce concours est actuellement fermé aux inscriptions.</p>
+                        </div>
+
+                        <div id="participateModal" class="hidden" style="background: var(--bg-color); border: 1px solid var(--border-color); padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+                            <h3>📝 Inscription au Concours</h3>
+                            <form id="submitContestEntryForm">
+                                <div class="input-group"><label>Nom & Prénom</label><input type="text" id="contestName" required></div>
+                                <div class="input-group"><label>Ville où vous avez spoté le train</label><input type="text" id="contestCity" placeholder="Ex: Saint-Cyr-l'École" required></div>
+                                <button type="submit" class="btn-primary" style="background-color: var(--secondary);">Valider ma participation</button>
+                                <p id="contestMsg" class="success"></p>
+                            </form>
+                        </div>
+
+                        <h3>🏅 Le Grand Podium</h3>
+                        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                            <div class="stat-box" style="border: 3px solid var(--warning); flex: 1;"><h4>🥇 1er</h4><p id="podium1">En attente</p></div>
+                            <div class="stat-box" style="border: 3px solid var(--border-color); flex: 1;"><h4>🥈 2ème</h4><p id="podium2">En attente</p></div>
+                            <div class="stat-box" style="border: 3px solid #cd7f32; flex: 1;"><h4>🥉 3ème</h4><p id="podium3">En attente</p></div>
+                        </div>
+
+                        <h3>📋 Liste des Participants</h3>
+                        <table>
+                            <thead><tr><th>Participant</th><th>Ville du Spot</th><th>Statut</th></tr></thead>
+                            <tbody id="contestParticipantsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 8. JE SPOTTE (SESSIONS) -->
+                <div id="spotSessionTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>📅 Je Spotte - Organiser / Partager une Session</h2>
+                        <div style="background: var(--bg-color); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 25px;">
+                            <h3>➕ Partager ma session</h3>
+                            <form id="addSpotSessionForm">
+                                <div class="input-group"><label>Lieu / Gare</label><input type="text" id="sessionPlace" placeholder="Ex: Versailles Chantiers" required></div>
+                                <div style="display: flex; gap: 15px;">
+                                    <div class="input-group" style="flex: 1;"><label>Date</label><input type="text" id="sessionDate" placeholder="Ex: Aujourd'hui / 15 Avril" required></div>
+                                    <div class="input-group" style="flex: 1;"><label>Heure Début</label><input type="text" id="sessionStart" placeholder="Ex: 14h00" required></div>
+                                    <div class="input-group" style="flex: 1;"><label>Heure Fin</label><input type="text" id="sessionEnd" placeholder="Ex: 17h00" required></div>
+                                </div>
+                                <button type="submit" class="btn-primary">Publier ma Session</button>
+                                <p id="sessionMsg" class="success"></p>
+                            </form>
+                        </div>
+
+                        <h3>👥 Sessions de Spotting Déclarées</h3>
+                        <table>
+                            <thead><tr><th>Spotter</th><th>Lieu</th><th>Date</th><th>Horaire</th><th>Action</th></tr></thead>
+                            <tbody id="spotSessionsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 9. JEU "TROUVE LE LIEU" (PHOTO ET DATE ÉPHÉMÈRE ADMIN) -->
+                <div id="quizTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>🧩 Jeu : Trouve le Lieu !</h2>
+                        <p id="quizDeadlineDisplay" style="font-weight: bold; color: var(--secondary);"></p>
+
+                        <div style="text-align: center; background: var(--bg-color); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <img id="quizDisplayImage" src="images (2).jfif" alt="Photo Mystère" class="quiz-image">
+                            
+                            <form id="quizAnswerForm">
+                                <div class="input-group">
+                                    <label>Quelle est cette gare / endroit ?</label>
+                                    <input type="text" id="quizAnswer" placeholder="Entrez votre réponse" required>
+                                </div>
+                                <button type="submit" id="btnSubmitQuiz" class="btn-primary" style="width: 220px;">Valider ma réponse</button>
+                                <p id="quizMsg"></p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. NOUS CONTACTER -->
+                <div id="contactTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>✉️ Nous Contacter</h2>
+                        <div style="background: rgba(0,85,165,0.05); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color);">
+                            <h3 style="margin-top:0;">Contact Administrateur</h3>
+                            <p>📞 <strong>Téléphone :</strong> 07 63 34 60 42</p>
+                            <p>📧 <strong>E-mail :</strong> enzo75706@gmail.com</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 11. PROFIL -->
+                <div id="profileTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>👤 Mon Profil Spotter</h2>
+                        <div id="spotterPermissionsBox" style="background: rgba(0,85,165,0.05); padding: 15px; border-radius: 10px; font-size: 14px; margin-bottom: 25px; border: 1px solid var(--border-color);"></div>
+                        <form id="updateSpotterSelfForm">
+                            <div class="input-group"><label>Nouvel identifiant</label><input type="text" id="newSpotterId" required></div>
+                            <div class="input-group"><label>Nouveau mot de passe</label><input type="password" id="newSpotterPass" required></div>
+                            <button type="submit" class="btn-primary" style="background-color: var(--warning);">Mettre à jour mes accès</button>
+                            <p id="spotterSelfMsg"></p>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 12. MODÉRATION & BANS -->
+                <div id="moderationTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>🛠️ Centre de Modération & Sanctions (3 Warns Max)</h2>
+                        <div style="border: 1px solid var(--warning); padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+                            <h3 style="color: var(--warning); margin-top:0;">⚠️ Envoyer un Avertissement (Warn)</h3>
+                            <form id="manualWarnForm">
+                                <div class="input-group"><label>Identifiant du Spotter</label><input type="text" id="warnTargetUser" placeholder="spotter_1234" required></div>
+                                <div class="input-group"><label>Motif / Raison</label><input type="text" id="warnReason" placeholder="Ex: Langage déplacé" required></div>
+                                <button type="submit" class="btn-primary" style="background-color: var(--warning);">Envoyer le Warn</button>
+                                <p id="warnMsg"></p>
+                            </form>
+                        </div>
+
+                        <div style="border: 1px solid var(--error); padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+                            <h3 style="color: var(--error); margin-top:0;">🚫 Bannir un Spotter</h3>
+                            <form id="manualBanForm">
+                                <div class="input-group"><label>Identifiant du Spotter</label><input type="text" id="banTargetUser" placeholder="spotter_1234" required></div>
+                                <div class="input-group"><label>Motif / Raison</label><input type="text" id="banReasonText" placeholder="Ex: Non-respect" required></div>
+                                <button type="submit" class="btn-primary" style="background-color: var(--error);">Bannir</button>
+                                <p id="banMsg"></p>
+                            </form>
+                        </div>
+
+                        <h3>📋 Casier Judiciaire & Sanctions</h3>
+                        <table>
+                            <thead><tr><th>Identifiant</th><th>Warns</th><th>Statut</th><th>Raison / Motif</th><th>Action</th></tr></thead>
+                            <tbody id="moderationTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 13. GESTION ADMIN COMPLÈTE -->
+                <div id="adminTab" class="tab-pane hidden">
+                    <div class="card">
+                        <h2>⚙️ Administration & Gestion Complète</h2>
+                        
+                        <!-- GESTION DU CONCOURS PAR L'ADMIN -->
+                        <div style="padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid var(--border-color);">
+                            <h3>🏆 Gérer le Concours & Événement</h3>
+                            <form id="adminManageContestForm">
+                                <div class="input-group"><label>Nom de l'événement</label><input type="text" id="adminContestTitle" required></div>
+                                <div class="input-group"><label>Description</label><textarea id="adminContestDesc" rows="2" required></textarea></div>
+                                <div class="input-group">
+                                    <label>Statut du Concours</label>
+                                    <select id="adminContestStatus">
+                                        <option value="active">ACTIF (Ouvert aux inscriptions)</option>
+                                        <option value="inactive">INACTIF (Fermé)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn-primary" style="background-color: var(--secondary);">Enregistrer les modifications du Concours</button>
+                                <p id="adminContestMsg" class="success"></p>
+                            </form>
+                        </div>
+
+                        <!-- GESTION DU JEU TROUVE LE LIEU PAR L'ADMIN -->
+                        <div style="padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid var(--border-color);">
+                            <h3>🧩 Configurer le Jeu "Trouve le Lieu"</h3>
+                            <form id="adminQuizConfigForm">
+                                <div class="input-group">
+                                    <label>Choisir la photo mystère depuis votre appareil</label>
+                                    <input type="file" id="adminQuizFile" accept="image/*">
+                                </div>
+                                <div class="input-group">
+                                    <label>Réponse exacte (Nom de la gare)</label>
+                                    <input type="text" id="adminQuizAnswer" placeholder="Ex: Versailles Chantiers" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>Date limite de participation (Éphémère)</label>
+                                    <input type="date" id="adminQuizDate" required>
+                                </div>
+                                <button type="submit" class="btn-primary" style="background-color: var(--secondary);">Mettre à jour le Jeu</button>
+                                <p id="adminQuizMsg" class="success"></p>
+                            </form>
+                        </div>
+
+                        <!-- ATTRIBUTION DE CREDITS -->
+                        <div style="padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid var(--border-color);">
+                            <h3>🏅 Attribuer des Crédits</h3>
+                            <form id="giveCreditsForm">
+                                <div class="input-group"><label>Identifiant du Spotter</label><input type="text" id="creditTargetUser" placeholder="spotter_1234" required></div>
+                                <div class="input-group"><label>Crédits à ajouter</label><input type="number" id="creditAmount" value="50" required></div>
+                                <button type="submit" class="btn-primary" style="background-color: var(--secondary);">Ajouter Crédits</button>
+                                <p id="creditMsg" class="success"></p>
+                            </form>
+                        </div>
+
+                        <!-- MODIFICATION COMPLETE COMPTES -->
+                        <div style="padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid var(--border-color);">
+                            <h3>✏️ Modifier les Comptes Spotters</h3>
+                            <table>
+                               <thead><tr><th>ID Actuel</th><th>Nouveau ID</th><th>Nouveau MDP</th><th>Rôle</th><th>Tél</th><th>Nom</th><th>Action</th></tr></thead>
+                               <tbody id="adminEditSpottersTableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <h3>➕ Créer un compte Spotter</h3>
+                        <form id="addSpotterForm">
+                            <div class="input-group"><label>Nom & Prénom</label><input type="text" id="spotterName" placeholder="Jean Dupont" required></div>
+                            <div class="input-group"><label>Téléphone (10 chiffres)</label><input type="text" id="phone" placeholder="0612345678" required></div>
+                            <div class="input-group"><label>Rôle</label>
+                                <select id="role"><option value="Spotter Photo">Spotter Photo</option><option value="Spotter Vidéo">Spotter Vidéo</option><option value="Spotter Photo & Vidéo">Spotter Photo & Vidéo</option></select>
+                            </div>
+                            <button type="submit" class="btn-primary">Générer les accès</button>
+                            <p id="spotterMsg"></p>
+                        </form>
+                        <div id="generatedCredentials" class="hidden" style="background: rgba(240,173,78,0.1); padding: 15px; margin-top: 15px; border-radius: 10px; border: 1px solid var(--border-color);">
+                            ID: <strong id="genUser"></strong> | MDP: <strong id="genPass"></strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+    const BAD_WORDS = ['con', 'connard', 'salope', 'pute', 'encule', 'enculé', 'merde', 'bâtard', 'batard', 'fdp', 'nique', 'sex', 'porno', 'nude'];
+
+    if (!localStorage.getItem('adminPass')) localStorage.setItem('adminPass', 'admin123');
+    if (!localStorage.getItem('spottersDB')) localStorage.setItem('spottersDB', JSON.stringify([]));
+    if (!localStorage.getItem('socialsDB')) localStorage.setItem('socialsDB', JSON.stringify([]));
+    if (!localStorage.getItem('chatGeneral')) localStorage.setItem('chatGeneral', JSON.stringify([]));
+    if (!localStorage.getItem('chatTrains')) localStorage.setItem('chatTrains', JSON.stringify([]));
+    if (!localStorage.getItem('contestDB')) localStorage.setItem('contestDB', JSON.stringify([]));
+    if (!localStorage.getItem('spotSessionsDB')) localStorage.setItem('spotSessionsDB', JSON.stringify([]));
+    if (!localStorage.getItem('darkMode')) localStorage.setItem('darkMode', 'false');
+
+    // INITIALISATION PARAMETRES ADMIN
+    if (!localStorage.getItem('contestTitle')) localStorage.setItem('contestTitle', 'Grand Concours de Spotting Île-de-France');
+    if (!localStorage.getItem('contestDesc')) localStorage.setItem('contestDesc', 'Participez et tentez de remporter des prix pour vos plus belles photos !');
+    if (!localStorage.getItem('contestStatus')) localStorage.setItem('contestStatus', 'active');
+    
+    if (!localStorage.getItem('quizAnswer')) localStorage.setItem('quizAnswer', 'Saint-Cyr');
+    if (!localStorage.getItem('quizDeadline')) localStorage.setItem('quizDeadline', '2026-12-31');
+    if (!localStorage.getItem('quizImageData')) localStorage.setItem('quizImageData', 'images (2).jfif');
+
+    let currentLoggedInUser = null;
+
+    function toggleTheme() {
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        localStorage.setItem('darkMode', !isDark);
+        applyTheme();
+    }
+    
+    function applyTheme() {
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.theme-toggle').innerText = '☀️ Mode Clair';
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.querySelector('.theme-toggle').innerText = '🌙 Mode Sombre';
+        }
+    }
+    applyTheme();
+
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.sidebar button').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.remove('hidden');
+        const btn = document.getElementById(`btn-${tabId}`);
+        if(btn) btn.classList.add('active');
+        
+        if(tabId === 'spotsTab') renderSpotsForLine();
+        if(tabId === 'stationsTab') { populateStationsForLine(); updateStationBoard(); }
+        if(tabId === 'contestTab') renderContestData();
+        if(tabId === 'spotSessionTab') renderSpotSessions();
+        if(tabId === 'quizTab') renderQuizGame();
+    }
+
+    function updateStats() {
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let gen = JSON.parse(localStorage.getItem('chatGeneral'));
+        let trains = JSON.parse(localStorage.getItem('chatTrains'));
+        document.getElementById('statMembers').innerText = spotters.length + 1;
+        document.getElementById('statMessages').innerText = gen.length + trains.length;
+        document.getElementById('statContestStatus').innerText = localStorage.getItem('contestStatus') === 'active' ? 'Actif' : 'Fermé';
+    }
+
+    const SPOTS_DATA = {
+        "N": { stations: ["Paris Montparnasse", "Clamart", "Meudon", "Versailles Chantiers", "Saint-Cyr", "Plaisir-Grignon", "Rambouillet", "Mantes-la-Jolie", "Dreux"], spots: ["<b>Gare de Versailles Chantiers :</b> Bout de quai stratégique pour les Regio2N et BB 26000.", "<b>Talus de Saint-Cyr :</b> Superbe vue en courbe.", "<b>Gare de Rambouillet :</b> Terminus idéal pour les manœuvres."] },
+        "L": { stations: ["Paris Saint-Lazare", "Bécon-les-Bruyères", "La Défense", "Saint-Cloud", "Versailles Rive Droite", "Cergy-le-Haut"], spots: ["<b>Gare de La Défense :</b> Passage des rames Z50000.", "<b>Viaduc de Saint-Cloud :</b> Panorama superbe."] },
+        "RER_C": { stations: ["Pontoise", "Versailles Chantiers", "Saint-Cyr", "Paris Austerlitz", "Juvisy", "Dourdan", "Étampes"], spots: ["<b>Gare de Saint-Cyr :</b> Voies centrales RER C.", "<b>Paris Austerlitz :</b> Idéal pour rames Z2N."] }
+    };
+
+    function renderSpotsForLine() {
+        const lineKey = document.getElementById('spotLineSelect').value;
+        const data = SPOTS_DATA[lineKey] || SPOTS_DATA["N"];
+        const diag = document.getElementById('spotLineDiagram');
+        diag.innerHTML = '';
+        data.stations.forEach((st, idx) => {
+            diag.innerHTML += `<div class="station-node ${idx === 0 ? 'active' : ''}"><div class="node-dot"></div><div class="node-name">${st}</div></div>`;
+        });
+        document.getElementById('spotLocationsList').innerHTML = '<ul>' + data.spots.map(s => `<li style="margin-bottom:10px;">${s}</li>`).join('') + '</ul>';
+    }
+
+    const STATIONS_BY_LINE = {
+        "N": ["Paris Montparnasse", "Clamart", "Meudon", "Chaville Rive Gauche", "Viroflay Rive Gauche", "Versailles Chantiers", "Saint-Cyr", "Plaisir - Grignon", "Rambouillet", "Mantes-la-Jolie", "Dreux"],
+        "L": ["Paris Saint-Lazare", "Bécon-les-Bruyères", "La Défense", "Saint-Cloud", "Versailles Rive Droite"],
+        "U": ["La Défense", "Versailles Chantiers", "Saint-Quentin-en-Yvelines", "La Verrière"],
+        "RER_C": ["Versailles Chantiers", "Saint-Cyr", "Paris Austerlitz", "Juvisy", "Dourdan"],
+        "RER_A": ["La Défense", "Châtelet les Halles", "Gare de Lyon", "Marne-la-Vallée Chessy"]
+    };
+
+    function populateStationsForLine() {
+        const line = document.getElementById('boardLineSelect').value;
+        const stationSelect = document.getElementById('boardStationSelect');
+        stationSelect.innerHTML = '';
+        (STATIONS_BY_LINE[line] || ["Gare Centrale"]).forEach(st => {
+            stationSelect.innerHTML += `<option value="${st}">${st}</option>`;
+        });
+        updateStationBoard();
+    }
+
+    // TABLEAU INFOGARE AVEC HEURE REELLE EXACTE
+    function updateStationBoard() {
+        const station = document.getElementById('boardStationSelect').value;
+        const line = document.getElementById('boardLineSelect').value;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        document.getElementById('currentRealTimeClock').innerText = timeStr;
+        document.getElementById('boardStationName').innerText = `${station} (${line})`;
+        const container = document.getElementById('boardRowsContainer');
+
+        // Génération dynamique des horaires basés sur l'heure réelle
+        let t1 = new Date(now.getTime() + 4 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let t2 = new Date(now.getTime() + 11 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let t3 = new Date(now.getTime() + 19 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let rows = [
+            { time: t1, dest: "PARIS MONTPARNASSE", mission: "POUI", voie: "1", statut: "À L'HEURE" },
+            { time: t2, dest: "RAMBOUILLET", mission: "KRAM", voie: "2", statut: "À L'HEURE" },
+            { time: t3, dest: "DREUX", mission: "DEBO", voie: "3", statut: "RETARD 3M" }
+        ];
+
+        let html = "";
+        rows.forEach(r => {
+            html += `<div class="board-row">
+                <span class="train-time">${r.time}</span>
+                <span class="train-dest">${station} ⇄ ${r.dest} (${r.mission})</span>
+                <span class="train-voie">Voie ${r.voie}</span>
+                <span style="color: ${r.statut.includes('RETARD') ? '#ff4444' : '#00ffcc'}; font-weight:bold; margin-left:15px;">${r.statut}</span>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function fetchTrafficStatus() {
+        const now = new Date();
+        document.getElementById('lastCheckTime').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const trafficData = [
+            { line: "Ligne N", status: "normal", reason: "Trafic fluide sur l'ensemble de la ligne." },
+            { line: "Ligne L", status: "normal", reason: "Circulation nominale." },
+            { line: "RER C", status: "perturbé", reason: "Ralentissements suite à un incident technique." }
+        ];
+        let html = "";
+        trafficData.forEach(item => {
+            html += `<div class="card" style="border-left: 4px solid ${item.status === 'perturbé' ? 'var(--error)' : 'var(--success)'}; margin-bottom:15px; padding: 15px;"><strong>${item.line} :</strong> ${item.reason}</div>`;
+        });
+        document.getElementById('trafficContainer').innerHTML = html;
+    }
+    fetchTrafficStatus();
+    setInterval(fetchTrafficStatus, 60000);
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
+        const msg = document.getElementById('loginMessage');
+        let savedAdminPass = localStorage.getItem('adminPass');
+
+        if (user === 'admin' && pass === savedAdminPass) {
+            msg.innerText = '';
+            currentLoggedInUser = 'admin';
+            unlockApp('admin');
+            return;
+        }
+
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let foundSpotter = spotters.find(s => s.id === user && s.pass === pass);
+        if (foundSpotter) {
+            if (foundSpotter.banned) {
+                msg.innerText = `Compte Banni (${foundSpotter.banReason || 'Infraction'}).`;
+                return;
+            }
+            msg.innerText = '';
+            currentLoggedInUser = foundSpotter.id;
+            unlockApp('spotter', foundSpotter);
+            return;
+        }
+        msg.innerText = 'Identifiant ou mot de passe incorrect.';
+    });
+
+    function unlockApp(role, spotterData = null) {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('mainGallery').classList.remove('hidden');
+        document.getElementById('protectedContent').classList.remove('hidden');
+        document.getElementById('headerUserNav').classList.remove('hidden');
+        document.getElementById('currentConnectedUser').innerText = currentLoggedInUser;
+
+        if(role === 'spotter') {
+            document.getElementById('userCreditsDisplay').innerText = spotterData.credits || 0;
+        } else {
+            document.getElementById('userCreditsDisplay').innerText = '∞';
+        }
+
+        renderSocials();
+        renderChat('General');
+        renderChat('Trains');
+        updateStats();
+
+        if (role === 'admin') {
+            document.getElementById('adminMenuTitle').classList.remove('hidden');
+            document.getElementById('btn-moderationTab').classList.remove('hidden');
+            document.getElementById('btn-adminTab').classList.remove('hidden');
+            document.getElementById('spotterMenuTitle').classList.add('hidden');
+            document.getElementById('btn-profileTab').classList.add('hidden');
+            
+            // Remplir les champs de gestion admin
+            document.getElementById('adminContestTitle').value = localStorage.getItem('contestTitle');
+            document.getElementById('adminContestDesc').value = localStorage.getItem('contestDesc');
+            document.getElementById('adminContestStatus').value = localStorage.getItem('contestStatus');
+            document.getElementById('adminQuizAnswer').value = localStorage.getItem('quizAnswer');
+            document.getElementById('adminQuizDate').value = localStorage.getItem('quizDeadline');
+            
+            loadAdminTables();
+        } else {
+            document.getElementById('spotterMenuTitle').classList.remove('hidden');
+            document.getElementById('btn-profileTab').classList.remove('hidden');
+            document.getElementById('adminMenuTitle').classList.add('hidden');
+            document.getElementById('btn-moderationTab').classList.add('hidden');
+            document.getElementById('btn-adminTab').classList.add('hidden');
+
+            document.getElementById('newSpotterId').value = spotterData.id;
+            document.getElementById('newSpotterPass').value = spotterData.pass;
+            document.getElementById('spotterPermissionsBox').innerHTML = `
+                <p><strong>Identifiant :</strong> ${spotterData.id}</p>
+                <p><strong>Nom & Prénom :</strong> ${spotterData.name || 'Non renseigné'}</p>
+                <p><strong>Rôle :</strong> ${spotterData.role}</p>
+                <p><strong>Avertissements :</strong> ${spotterData.warns || 0} / 3</p>
+                <p><strong>Crédits :</strong> ${spotterData.credits || 0} pts</p>
+            `;
+        }
+        showTab('trafficTab');
+    }
+
+    function logout() {
+        document.getElementById('protectedContent').classList.add('hidden');
+        document.getElementById('mainGallery').classList.add('hidden');
+        document.getElementById('headerUserNav').classList.add('hidden');
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        currentLoggedInUser = null;
+    }
+
+    // CONCOURS & EVENEMENTS (STATUT ACTIF/INACTIF + ADMIN SEPARE)
+    function openParticipateModal() {
+        document.getElementById('participateModal').classList.remove('hidden');
+    }
+
+    document.getElementById('submitContestEntryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('contestName').value.trim();
+        const city = document.getElementById('contestCity').value.trim();
+
+        let contest = JSON.parse(localStorage.getItem('contestDB'));
+        contest.push({ user: currentLoggedInUser, name: name, city: city, status: 'Participe' });
+        localStorage.setItem('contestDB', JSON.stringify(contest));
+
+        document.getElementById('contestMsg').innerText = "Participation enregistrée avec succès !";
+        document.getElementById('contestName').value = '';
+        document.getElementById('contestCity').value = '';
+        renderContestData();
+    });
+
+    function renderContestData() {
+        document.getElementById('displayContestTitle').innerText = localStorage.getItem('contestTitle');
+        document.getElementById('contestDesc').innerText = localStorage.getItem('contestDesc');
+        
+        const isClosed = localStorage.getItem('contestStatus') === 'inactive';
+        if(isClosed) {
+            document.getElementById('participateBox').classList.add('hidden');
+            document.getElementById('contestClosedMsg').classList.remove('hidden');
+        } else {
+            document.getElementById('participateBox').classList.remove('hidden');
+            document.getElementById('contestClosedMsg').classList.add('hidden');
+        }
+
+        let contest = JSON.parse(localStorage.getItem('contestDB'));
+        let tbody = document.getElementById('contestParticipantsTableBody');
+        tbody.innerHTML = '';
+
+        if(contest.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; opacity:0.6;">Aucun participant pour le moment.</td></tr>`;
+            document.getElementById('podium1').innerText = "En attente";
+            document.getElementById('podium2').innerText = "En attente";
+            document.getElementById('podium3').innerText = "En attente";
+            return;
+        }
+
+        contest.forEach((c, idx) => {
+            tbody.innerHTML += `<tr><td><strong>${c.name}</strong> (${c.user})</td><td>${c.city}</td><td><span style="color:var(--success);">Inscrit</span></td></tr>`;
+            if(idx === 0) document.getElementById('podium1').innerText = c.name + " (" + c.city + ")";
+            if(idx === 1) document.getElementById('podium2').innerText = c.name + " (" + c.city + ")";
+            if(idx === 2) document.getElementById('podium3').innerText = c.name + " (" + c.city + ")";
+        });
+    }
+
+    document.getElementById('adminManageContestForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        localStorage.setItem('contestTitle', document.getElementById('adminContestTitle').value.trim());
+        localStorage.setItem('contestDesc', document.getElementById('adminContestDesc').value.trim());
+        localStorage.setItem('contestStatus', document.getElementById('adminContestStatus').value);
+        
+        document.getElementById('adminContestMsg').innerText = "Concours mis à jour avec succès !";
+        updateStats();
+        renderContestData();
+    });
+
+    // JE SPOTTE (ADMIN SUPPRIME / SPOTTER NE PEUT PAS SUPPRIMER)
+    document.getElementById('addSpotSessionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const place = document.getElementById('sessionPlace').value.trim();
+        const date = document.getElementById('sessionDate').value.trim();
+        const start = document.getElementById('sessionStart').value.trim();
+        const end = document.getElementById('sessionEnd').value.trim();
+
+        let sessions = JSON.parse(localStorage.getItem('spotSessionsDB'));
+        sessions.push({ id: Date.now(), user: currentLoggedInUser, place: place, date: date, start: start, end: end });
+        localStorage.setItem('spotSessionsDB', JSON.stringify(sessions));
+
+        document.getElementById('sessionMsg').innerText = "Session publiée avec succès !";
+        document.getElementById('sessionPlace').value = '';
+        document.getElementById('sessionDate').value = '';
+        document.getElementById('sessionStart').value = '';
+        document.getElementById('sessionEnd').value = '';
+        renderSpotSessions();
+    });
+
+    function renderSpotSessions() {
+        let sessions = JSON.parse(localStorage.getItem('spotSessionsDB'));
+        let tbody = document.getElementById('spotSessionsTableBody');
+        tbody.innerHTML = '';
+
+        if(sessions.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; opacity:0.6;">Aucune session déclarée.</td></tr>`;
+            return;
+        }
+
+        sessions.forEach(s => {
+            let deleteBtn = (currentLoggedInUser === 'admin') ? `<button onclick="deleteSpotSession(${s.id})" style="background:var(--error); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Supprimer</button>` : `<i style="font-size:11px; opacity:0.6;">Verrouillé</i>`;
+            tbody.innerHTML += `<tr><td><strong>${s.user}</strong></td><td>${s.place}</td><td>${s.date}</td><td>${s.start} à ${s.end}</td><td>${deleteBtn}</td></tr>`;
+        });
+    }
+
+    function deleteSpotSession(id) {
+        if(confirm("Supprimer cette session de spot ?")) {
+            let sessions = JSON.parse(localStorage.getItem('spotSessionsDB'));
+            sessions = sessions.filter(s => s.id !== id);
+            localStorage.setItem('spotSessionsDB', JSON.stringify(sessions));
+            renderSpotSessions();
+        }
+    }
+
+    // JEU TROUVE LE LIEU (PHOTO FICHIERS ADMIN & DATE EPHEMERE)
+    function renderQuizGame() {
+        const imgData = localStorage.getItem('quizImageData');
+        const deadline = localStorage.getItem('quizDeadline');
+        
+        document.getElementById('quizDisplayImage').src = imgData;
+        document.getElementById('quizDeadlineDisplay').innerText = `Date limite de réponse : ${deadline}`;
+
+        const today = new Date().toISOString().split('T')[0];
+        if(today > deadline) {
+            document.getElementById('quizMsg').className = 'error';
+            document.getElementById('quizMsg').innerText = "Ce jeu mystère est expiré ! Attendez la prochaine photo de l'admin.";
+            document.getElementById('btnSubmitQuiz').disabled = true;
+        } else {
+            document.getElementById('btnSubmitQuiz').disabled = false;
+        }
+    }
+
+    document.getElementById('adminQuizConfigForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('adminQuizFile');
+        const answer = document.getElementById('adminQuizAnswer').value.trim();
+        const date = document.getElementById('adminQuizDate').value;
+
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                localStorage.setItem('quizImageData', e.target.result);
+                saveQuizConfig(answer, date);
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            saveQuizConfig(answer, date);
+        }
+    });
+
+    function saveQuizConfig(answer, date) {
+        localStorage.setItem('quizAnswer', answer);
+        localStorage.setItem('quizDeadline', date);
+        document.getElementById('adminQuizMsg').innerText = "Jeu mis à jour avec succès !";
+        renderQuizGame();
+    }
+
+    document.getElementById('quizAnswerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const userAnswer = document.getElementById('quizAnswer').value.trim().toLowerCase();
+        const correctAnswer = localStorage.getItem('quizAnswer').toLowerCase();
+
+        if(userAnswer === correctAnswer || userAnswer.includes(correctAnswer)) {
+            document.getElementById('quizMsg').className = 'success';
+            document.getElementById('quizMsg').innerText = "Bravo ! C'est la bonne réponse !";
+        } else {
+            document.getElementById('quizMsg').className = 'error';
+            document.getElementById('quizMsg').innerText = "Mauvaise réponse, réessaie !";
+        }
+    });
+
+    // MODERATION & BANS
+    document.getElementById('manualWarnForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const target = document.getElementById('warnTargetUser').value.trim();
+        const reason = document.getElementById('warnReason').value.trim();
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let idx = spotters.findIndex(s => s.id === target);
+
+        if (idx !== -1) {
+            spotters[idx].warns = (spotters[idx].warns || 0) + 1;
+            spotters[idx].banReason = `Warn (${reason})`;
+            if (spotters[idx].warns >= 3) {
+                spotters[idx].banned = true;
+                spotters[idx].banReason = `Banni automatique (3 Warns : ${reason})`;
+            }
+            localStorage.setItem('spottersDB', JSON.stringify(spotters));
+            document.getElementById('warnMsg').className = 'success';
+            document.getElementById('warnMsg').innerText = `Avertissement envoyé à ${target}.`;
+            loadAdminTables();
+        } else {
+            document.getElementById('warnMsg').className = 'error';
+            document.getElementById('warnMsg').innerText = 'Spotter introuvable.';
+        }
+    });
+
+    document.getElementById('manualBanForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const target = document.getElementById('banTargetUser').value.trim();
+        const reason = document.getElementById('banReasonText').value.trim();
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let idx = spotters.findIndex(s => s.id === target);
+
+        if (idx !== -1) {
+            spotters[idx].banned = true;
+            spotters[idx].banReason = `Banni - Motif : ${reason}`;
+            localStorage.setItem('spottersDB', JSON.stringify(spotters));
+            document.getElementById('banMsg').className = 'success';
+            document.getElementById('banMsg').innerText = `Utilisateur ${target} banni.`;
+            loadAdminTables();
+        } else {
+            document.getElementById('banMsg').className = 'error';
+            document.getElementById('banMsg').innerText = 'Introuvable.';
+        }
+    });
+
+    document.getElementById('giveCreditsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const target = document.getElementById('creditTargetUser').value.trim();
+        const amount = parseInt(document.getElementById('creditAmount').value);
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let idx = spotters.findIndex(s => s.id === target);
+
+        if (idx !== -1) {
+            spotters[idx].credits = (spotters[idx].credits || 0) + amount;
+            localStorage.setItem('spottersDB', JSON.stringify(spotters));
+            document.getElementById('creditMsg').innerText = `${amount} crédits ajoutés à ${target} !`;
+            loadAdminTables();
+        } else {
+            alert("Spotter introuvable.");
+        }
+    });
+
+    function loadAdminTables() {
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let modTbody = document.getElementById('moderationTableBody');
+        modTbody.innerHTML = '';
+        spotters.forEach(s => {
+            let status = s.banned ? `<span style="color:var(--error); font-weight:bold;">BANNI</span>` : `<span style="color:var(--success); font-weight:bold;">Actif</span>`;
+            modTbody.innerHTML += `<tr><td><strong>${s.id}</strong></td><td>${s.warns || 0}/3</td><td>${status}</td><td>${s.banReason || 'Aucune'}</td><td><button onclick="unbanUser('${s.id}')" style="padding:4px 8px;">Débannir</button></td></tr>`;
+        });
+
+        let editTbody = document.getElementById('adminEditSpottersTableBody');
+        editTbody.innerHTML = '';
+        spotters.forEach((s, index) => {
+            editTbody.innerHTML += `
+                <tr>
+                    <td><strong>${s.id}</strong></td>
+                    <td><input type="text" id="edit_id_${index}" value="${s.id}" style="width:100px;"></td>
+                    <td><input type="text" id="edit_pass_${index}" value="${s.pass}" style="width:90px;"></td>
+                    <td>
+                        <select id="edit_role_${index}">
+                            <option value="Spotter Photo" ${s.role==='Spotter Photo'?'selected':''}>Photo</option>
+                            <option value="Spotter Vidéo" ${s.role==='Spotter Vidéo'?'selected':''}>Vidéo</option>
+                            <option value="Spotter Photo & Vidéo" ${s.role==='Spotter Photo & Vidéo'?'selected':''}>Photo & Vidéo</option>
+                        </select>
+                    </td>
+                    <td><input type="text" id="edit_phone_${index}" value="${s.phone || ''}" style="width:100px;"></td>
+                    <td><input type="text" id="edit_name_${index}" value="${s.name || ''}" style="width:120px;"></td>
+                    <td><button onclick="saveSpotterEdit(${index})" class="btn-primary" style="padding:6px 12px; font-size:12px;">Enregistrer</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function saveSpotterEdit(index) {
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        spotters[index].id = document.getElementById(`edit_id_${index}`).value.trim();
+        spotters[index].pass = document.getElementById(`edit_pass_${index}`).value.trim();
+        spotters[index].role = document.getElementById(`edit_role_${index}`).value;
+        spotters[index].phone = document.getElementById(`edit_phone_${index}`).value.trim();
+        spotters[index].name = document.getElementById(`edit_name_${index}`).value.trim();
+        
+        localStorage.setItem('spottersDB', JSON.stringify(spotters));
+        alert("Modifications enregistrées !");
+        loadAdminTables();
+    }
+
+    function unbanUser(userId) {
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let idx = spotters.findIndex(s => s.id === userId);
+        if (idx !== -1) {
+            spotters[idx].banned = false;
+            spotters[idx].warns = 0;
+            spotters[idx].banReason = "Débanni";
+            localStorage.setItem('spottersDB', JSON.stringify(spotters));
+            loadAdminTables();
+        }
+    }
+
+    document.getElementById('addSpotterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('spotterName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const role = document.getElementById('role').value;
+        if (!/^[0-9]{10}$/.test(phone)) {
+            document.getElementById('spotterMsg').className = 'error';
+            document.getElementById('spotterMsg').innerText = '10 chiffres requis.';
+            return;
+        }
+        const randomId = 'spotter_' + Math.floor(1000 + Math.random() * 9000);
+        const randomPass = Math.random().toString(36).slice(-8);
+
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        spotters.push({ id: randomId, pass: randomPass, name, role, phone, warns: 0, banned: false, credits: 0, banReason: '' });
+        localStorage.setItem('spottersDB', JSON.stringify(spotters));
+
+        document.getElementById('genUser').innerText = randomId;
+        document.getElementById('genPass').innerText = randomPass;
+        document.getElementById('generatedCredentials').classList.remove('hidden');
+        loadAdminTables();
+        updateStats();
+    });
+
+    document.getElementById('updateSpotterSelfForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const newId = document.getElementById('newSpotterId').value.trim();
+        const newPass = document.getElementById('newSpotterPass').value.trim();
+        let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+        let idx = spotters.findIndex(s => s.id === currentLoggedInUser);
+        if(idx !== -1) {
+            spotters[idx].id = newId;
+            spotters[idx].pass = newPass;
+            localStorage.setItem('spottersDB', JSON.stringify(spotters));
+            currentLoggedInUser = newId;
+            document.getElementById('currentConnectedUser').innerText = newId;
+            document.getElementById('spotterSelfMsg').className = 'success';
+            document.getElementById('spotterSelfMsg').innerText = 'Identifiants mis à jour !';
+        }
+    });
+
+    // CHAT & MODERATION
+    document.getElementById('sendChatGeneralForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const input = document.getElementById('msgInputGeneral');
+        const fileInput = document.getElementById('imageInputGeneral');
+        const text = input.value.trim();
+        
+        let imageHtml = "";
+        if (fileInput.files && fileInput.files[0]) {
+            const fileName = fileInput.files[0].name.toLowerCase();
+            if(fileName.includes('bad') || fileName.includes('nsfw') || fileName.includes('xxx')) {
+                alert("⚠️ Image rejetée : Contenu inapproprié !");
+                fileInput.value = '';
+                return;
+            }
+            imageHtml = `<img src="${URL.createObjectURL(fileInput.files[0])}" alt="Photo partagée">`;
+        }
+
+        const words = text.toLowerCase().split(/\s+/);
+        const hasBadWord = words.some(w => BAD_WORDS.includes(w.replace(/[^a-z0-9]/g, '')));
+
+        if (hasBadWord && currentLoggedInUser !== 'admin') {
+            let spotters = JSON.parse(localStorage.getItem('spottersDB'));
+            let index = spotters.findIndex(s => s.id === currentLoggedInUser);
+            if (index !== -1) {
+                spotters[index].warns = (spotters[index].warns || 0) + 1;
+                spotters[index].banReason = "Propos obscènes ou interdits";
+                let w = spotters[index].warns;
+                if (w < 3) {
+                    alert(`⚠️ Avertissement (${w}/3) : Langage inapproprié.`);
+                } else {
+                    spotters[index].banned = true;
+                    spotters[index].banReason = "Banni (3 Avertissements atteints)";
+                    alert("🚫 Compte banni pour atteinte aux règles.");
+                    logout();
+                }
+                localStorage.setItem('spottersDB', JSON.stringify(spotters));
+            }
+            input.value = '';
+            fileInput.value = '';
+            return;
+        }
+
+        let formattedText = text.replace(/#(\w+)/g, '<span class="hashtag">#$1</span>').replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+        let chatData = JSON.parse(localStorage.getItem('chatGeneral'));
+        chatData.push({ id: Date.now(), user: currentLoggedInUser, text: formattedText, image: imageHtml, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+        localStorage.setItem('chatGeneral', JSON.stringify(chatData));
+        
+        input.value = '';
+        fileInput.value = '';
+        renderChat('General');
+        updateStats();
+    });
+
+    document.getElementById('sendChatTrainsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const input = document.getElementById('msgInputTrains');
+        const text = input.value.trim();
+        if(!text) return;
+
+        let chatData = JSON.parse(localStorage.getItem('chatTrains'));
+        chatData.push({ id: Date.now(), user: currentLoggedInUser, text: text, image: "", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+        localStorage.setItem('chatTrains', JSON.stringify(chatData));
+        input.value = '';
+        renderChat('Trains');
+        updateStats();
+    });
+
+    function renderChat(type) {
+        let chatData = JSON.parse(localStorage.getItem(`chat${type}`));
+        const container = document.getElementById(`chatBox${type}`);
+        container.innerHTML = '';
+        chatData.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'chat-msg';
+            let del = (currentLoggedInUser === 'admin') ? `<span class="delete-msg" onclick="deleteChatMessage('${type}', ${m.id})">✖</span>` : '';
+            div.innerHTML = `<strong>${m.user}</strong> <span class="time">${m.time}</span> ${del}<div>${m.text}</div>${m.image || ''}`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function deleteChatMessage(type, msgId) {
+        if (confirm("Supprimer ce message ?")) {
+            let chatData = JSON.parse(localStorage.getItem(`chat${type}`));
+            chatData = chatData.filter(m => m.id !== msgId);
+            localStorage.setItem(`chat${type}`, JSON.stringify(chatData));
+            renderChat(type);
+            updateStats();
+        }
+    }
+
+    function renderSocials() {
+        const platforms = ['tiktok', 'snapchat', 'instagram', 'facebook', 'youtube', 'twitter'];
+        let socials = JSON.parse(localStorage.getItem('socialsDB'));
+        platforms.forEach(p => {
+            const container = document.getElementById(`list-${p}`);
+            const items = socials.filter(s => s.platform === p);
+            if (items.length === 0) {
+                container.innerHTML = `<i style="font-size: 12px; opacity:0.6;">Aucun compte</i>`;
+            } else {
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const tag = document.createElement('span');
+                    tag.className = 'social-tag';
+                    let del = (currentLoggedInUser === 'admin') ? `<span class="delete-btn" onclick="deleteSocial(${item.id})">✖</span>` : '';
+                    tag.innerHTML = `${item.handle} ${del}`;
+                    container.appendChild(tag);
+                });
+            }
+        });
+    }
+
+    function deleteSocial(id) {
+        if (confirm("Supprimer ce réseau social ?")) {
+            let socials = JSON.parse(localStorage.getItem('socialsDB'));
+            socials = socials.filter(s => s.id !== id);
+            localStorage.setItem('socialsDB', JSON.stringify(socials));
+            renderSocials();
+        }
+    }
+</script>
+
+</body>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+</script>
+</html>
