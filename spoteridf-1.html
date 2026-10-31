@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Gestion</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #0056b3; }
+        .section { margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #0056b3; color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        button:hover { background: #004095; }
+        .success { color: green; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Panneau d'Administration</h1>
+    
+    <!-- 1. Paramètres Administrateur (Mot de passe) -->
+    <div class="section">
+        <h2>Paramètres Admin - Modifier le mot de passe</h2>
+        <form id="adminPasswordForm">
+            <label for="currentAdminPass">Mot de passe actuel :</label>
+            <input type="password" id="currentAdminPass" required>
+            
+            <label for="newAdminPass">Nouveau mot de passe :</label>
+            <input type="password" id="newAdminPass" required>
+            
+            <button type="submit">Mettre à jour le mot de passe</button>
+            <div id="passMsg" class="success" style="display:none;">Mot de passe modifié avec succès !</div>
+        </form>
+    </div>
+
+    <!-- 2. Gestion du Concours & Configuration -->
+    <div class="section">
+        <h2>Configuration du Jeu & Concours</h2>
+        <form id="gameConfigForm">
+            <label for="contestStatus">Statut du Concours :</label>
+            <select id="contestStatus">
+                <option value="active">Actif</option>
+                <option value="paused">En pause</option>
+                <option value="closed">Clôturé</option>
+            </select>
+
+            <label for="gameSettings">Paramètres spécifiques du jeu :</label>
+            <input type="text" id="gameSettings" placeholder="Ex: Difficulté, bonus actifs...">
+            
+            <button type="submit">Enregistrer la configuration</button>
+        </form>
+    </div>
+
+    <!-- 3. Attribution de Crédits -->
+    <div class="section">
+        <h2>Attribuer des Crédits</h2>
+        <form id="creditsForm">
+            <label for="targetUser">Nom d'utilisateur / ID :</label>
+            <input type="text" id="targetUser" placeholder="Ex: Spotteur78" required>
+
+            <label for="creditAmount">Nombre de crédits à ajouter :</label>
+            <input type="number" id="creditAmount" placeholder="100" required>
+            
+            <button type="submit">Envoyer les crédits</button>
+        </form>
+    </div>
+
+    <!-- 4. Gestion et Création de Comptes Spotter -->
+    <div class="section">
+        <h2>Gestion des Comptes Spotter</h2>
+        <form id="createSpotterForm">
+            <h3>Créer un compte spotter</h3>
+            <label for="spotterName">Nom du spotter :</label>
+            <input type="text" id="spotterName" required>
+            
+            <label for="spotterEmail">Email :</label>
+            <input type="email" id="spotterEmail" required>
+
+            <button type="submit">Créer le compte</button>
+        </form>
+
+        <h3 style="margin-top: 20px;">Modifier / Gérer un compte existant</h3>
+        <label for="manageSpotterSelect">Sélectionner un spotter :</label>
+        <select id="manageSpotterSelect">
+            <option value="spotter1">Spotteur_78330</option>
+            <option value="spotter2">Drixize_d</option>
+        </select>
+        <button type="button" onclick="alert('Fonction de modification du compte sélectionné activée.')">Modifier ce compte</button>
+    </div>
+
+    <!-- 5. Modération : Avertissements et Bannissements -->
+    <div class="section">
+        <h2>Modération (Warn & Bannissement)</h2>
+        <form id="moderationForm">
+            <label for="modUser">Utilisateur ciblé :</label>
+            <input type="text" id="modUser" placeholder="Nom d'utilisateur" required>
+
+            <label for="modAction">Action :</label>
+            <select id="modAction">
+                <option value="warn">Envoyer un avertissement (Warn)</option>
+                <option value="ban">Bannir définitivement</option>
+            </select>
+
+            <label for="modReason">Motif :</label>
+            <input type="text" id="modReason" placeholder="Raison de la sanction..." required>
+            
+            <button type="submit">Appliquer la sanction</button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    // Gestion du changement de mot de passe admin
+    document.getElementById('adminPasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const currentPass = document.getElementById('currentAdminPass').value;
+        const newPass = document.getElementById('newAdminPass').value;
+        
+        // Stockage local pour simulation (à adapter selon ta base de données/backend)
+        localStorage.setItem('adminPassword', newPass);
+        
+        document.getElementById('passMsg').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('passMsg').style.display = 'none';
+        }, 3000);
+        this.reset();
+    });
+
+    // Autres formulaires (simulation d'envoi)
+    document.getElementById('gameConfigForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Configuration du jeu mise à jour avec succès !');
+    });
+
+    document.getElementById('creditsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Crédits attribués avec succès !');
+        this.reset();
+    });
+
+    document.getElementById('createSpotterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Compte spotter créé avec succès !');
+        this.reset();
+    });
+
+    document.getElementById('moderationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Sanction appliquée avec succès !');
+        this.reset();
+    });
+</script>
+
+</body>
+</html>
